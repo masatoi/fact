@@ -1,0 +1,17 @@
+;; shadow-cljs configuration
+{:source-paths
+ ["src/dev"
+  "src/main"
+  "src/test"]
+
+ :dependencies
+ [[com.github.sauercrowd/clojureworker "0.0.1"]]
+
+ :nrepl {:port 7888}
+
+ :builds
+ {:worker
+  {:target :esm
+   :output-dir "src"
+   :modules {:worker {:entries [core]}}
+   :compiler-options {:optimizations :advanced}}}}

@@ -170,3 +170,11 @@ dist
 
 .dev.vars
 .wrangler/
+
+# Emacs temporary files
+*~
+.#*
+
+# Shadow-cljs settings
+
+.shadow-cljs/
