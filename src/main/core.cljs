@@ -14,30 +14,15 @@
     1
     (* n (fact (- n 1)))))
 
-#_
-(defn ^:export fetch [request env ctx]
-  (js/Promise.resolve
-   (js/Response. (str "fact(10)=" (fact 10)))))
-
-#_
-(defn ^:export fetch [request env ctx]
-  (let [data #js {:fact (fact 10)
-                  :request (js-obj
-                            "url" (.-url request)
-                            "method" (.-method request))
-                  :env env
-                  :ctx ctx}
-        body (js/JSON.stringify data)]
-    (js/Promise.resolve
-     (js/Response. body
-                   #js {:status 200
-                        :headers #js {"Content-Type" "application/json"}}))))
-
 (defn respond-json [data]
   (let [body (js/JSON.stringify (clj->js data))]
     (js/Response. body
                   #js {:status 200
                        :headers #js {"Content-Type" "application/json"}})))
+
+(defn parse-int [s]
+  (let [n (js/parseInt s 10)]
+    (if (js/isNaN n) nil n)))
 
 (defn ^:export fetch [request env ctx]
   (let [url (new js/URL (.-url request))
@@ -47,7 +32,13 @@
      (cond
        ;; GET /fact
        (and (= method "GET") (= path "/fact"))
-       (respond-json {:fact (fact 10)})
+       (let [n-str (.get (.-searchParams url) "n")
+             n (parse-int n-str)]
+         (if (and n (>= n 0))
+           (js/Promise.resolve
+            (respond-json {:n n :fact (fact n)}))
+           (js/Promise.resolve
+            (js/Response. "Invalid or missing ?n= query" #js {:status 400}))))
 
        ;; GET /ping
        (and (= method "GET") (= path "/ping"))
